@@ -160,8 +160,12 @@ def user_index():
 
 @bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
+    #create a user form to store data from form
     form = CreateUserForm()
+
+    #if the form is being submitted
     if form.validate_on_submit():
+        #create the structure of this new user
         a_dict = {  form.name.data + '' : {
                         "active": 'true',
                         "authentication_method": "cleartext",
@@ -170,17 +174,20 @@ def user_create():
                         "roles": '[]'
                         },
                     }
-
+        #copy all current users to data
         with open('./user/users.json') as data_file:
             data = json.load(data_file)
 
+        #update it with new user account
         data.update(a_dict)
 
+        #put all users including new one back to the user.json file
         with open('./user/users.json', 'w') as f:
             json.dump(data, f)
 
         flash('Account Created', 'success')
         return redirect(url_for('wiki.user_login'))
+        
     return render_template('userCreate.html', form=form)
 
 
