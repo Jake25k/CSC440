@@ -17,11 +17,14 @@ from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
 from wiki.web.forms import SearchForm
+from wiki.web.forms import CreateUserForm
 from wiki.web.forms import URLForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
+import json
+import os
 
 bp = Blueprint('wiki', __name__)
 
@@ -155,9 +158,30 @@ def user_index():
     pass
 
 
-@bp.route('/user/create/')
+@bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    pass
+    form = CreateUserForm()
+    if form.validate_on_submit():
+        a_dict = {  form.name.data + '' : {
+                        "active": 'true',
+                        "authentication_method": "cleartext",
+                        "password": form.password.data + '',
+                        "authenticated": 'true',
+                        "roles": '[]'
+                        },
+                    }
+
+        with open('./user/users.json') as data_file:
+            data = json.load(data_file)
+
+        data.update(a_dict)
+
+        with open('./user/users.json', 'w') as f:
+            json.dump(data, f)
+
+        flash('Account Created', 'success')
+        return redirect(url_for('wiki.user_login'))
+    return render_template('userCreate.html', form=form)
 
 
 @bp.route('/user/<int:user_id>/')
@@ -179,4 +203,3 @@ def user_delete(user_id):
 @bp.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
-
