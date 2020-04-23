@@ -17,11 +17,14 @@ from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
 from wiki.web.forms import SearchForm
+from wiki.web.forms import CreateUserForm
 from wiki.web.forms import URLForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
+import json
+import os
 
 bp = Blueprint('wiki', __name__)
 
@@ -41,6 +44,13 @@ def index():
     pages = current_wiki.index()
     return render_template('index.html', pages=pages)
 
+@bp.route('/userpage/')
+@protect
+def userpage():
+    page = current_wiki.get('userpage')
+    if page:
+        return display('userpage')
+    return render_template('userpage.html')
 
 @bp.route('/<path:url>/')
 @protect
@@ -72,7 +82,6 @@ def edit(url):
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
-
 
 @bp.route('/preview/', methods=['POST'])
 @protect
@@ -155,9 +164,37 @@ def user_index():
     pass
 
 
-@bp.route('/user/create/')
+@bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    pass
+    #create a user form to store data from form
+    form = CreateUserForm()
+
+    #if the form is being submitted
+    if form.validate_on_submit():
+        #create the structure of this new user
+        a_dict = {  form.name.data + '' : {
+                        "active": 'true',
+                        "authentication_method": "cleartext",
+                        "password": form.password.data + '',
+                        "authenticated": 'true',
+                        "roles": '[]'
+                        },
+                    }
+        #copy all current users to data
+        with open('./user/users.json') as data_file:
+            data = json.load(data_file)
+
+        #update it with new user account
+        data.update(a_dict)
+
+        #put all users including new one back to the user.json file
+        with open('./user/users.json', 'w') as f:
+            json.dump(data, f)
+
+        flash('Account Created', 'success')
+        return redirect(url_for('wiki.user_login'))
+        
+    return render_template('userCreate.html', form=form)
 
 
 @bp.route('/user/<int:user_id>/')
@@ -179,4 +216,3 @@ def user_delete(user_id):
 @bp.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
-

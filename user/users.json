@@ -3,7 +3,7 @@
     "active": true,
     "authentication_method": "cleartext",
     "password": "1234",
-    "authenticated": true,
+    "authenticated": false,
     "roles": []
   },
   "sam": {
@@ -12,5 +12,12 @@
     "password": "1234",
     "authenticated": true,
     "roles": []
+  },
+  "james": {
+    "active": "true",
+    "authentication_method": "cleartext",
+    "password": "1234",
+    "authenticated": false,
+    "roles": "[]"
   }
 }
