@@ -14,7 +14,7 @@ from flask_login import login_user
 from flask_login import logout_user
 
 from wiki.core import Processor
-from wiki.web.forms import EditorForm
+from wiki.web.forms import EditorForm, ConfirmPassword
 from wiki.web.forms import LoginForm
 from wiki.web.forms import SearchForm
 from wiki.web.forms import CreateUserForm
@@ -44,6 +44,7 @@ def index():
     pages = current_wiki.index()
     return render_template('index.html', pages=pages)
 
+
 @bp.route('/userpage/')
 @protect
 def userpage():
@@ -51,6 +52,7 @@ def userpage():
     if page:
         return display('userpage')
     return render_template('userpage.html')
+
 
 @bp.route('/<path:url>/')
 @protect
@@ -82,6 +84,7 @@ def edit(url):
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
+
 
 @bp.route('/preview/', methods=['POST'])
 @protect
@@ -164,36 +167,77 @@ def user_index():
     pass
 
 
+@bp.route('/user/editpass/', methods=['GET', 'POST'])
+@login_required
+def change_pass():
+    form = ConfirmPassword()
+
+    # Check if form is submitted to change password
+    if form.validate_on_submit():
+        # Check is password and confirm password match
+        if form.password.data == form.confirmPassword.data \
+                or form.password != '' \
+                or form.confirmPassword != '':
+
+            with open('./user/users.json', 'r') as json_file:
+                data = json.load(json_file)
+
+            # Get current password and replace with new one
+            cur = current_user.get_id()
+            update_dict = {cur + '': {
+                "active": 'true',
+                "authentication_method": "cleartext",
+                "password": form.password.data + '',
+                "authenticated": 'true',
+                "roles": '[]'
+            },
+            }
+
+            data.update(update_dict)
+
+            # Update users.json
+            with open('./user/users.json', 'w') as json_file:
+                json.dump(data, json_file)
+
+            flash('Password Changed', 'success')
+            return redirect(url_for('wiki.user_login'))
+
+        else:
+            flash('Password\'s do not match', 'warning')
+
+    return render_template('editPassword.html', form=form)
+
+
 @bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    #create a user form to store data from form
+    # create a user form to store data from form
     form = CreateUserForm()
 
-    #if the form is being submitted
+    # if the form is being submitted
     if form.validate_on_submit():
-        #create the structure of this new user
-        a_dict = {  form.name.data + '' : {
-                        "active": 'true',
-                        "authentication_method": "cleartext",
-                        "password": form.password.data + '',
-                        "authenticated": 'true',
-                        "roles": '[]'
-                        },
-                    }
-        #copy all current users to data
+        # create the structure of this new user
+        a_dict = {form.name.data + '': {
+            "active": 'true',
+            "authentication_method": "cleartext",
+            "password": form.password.data + '',
+            "authenticated": 'true',
+            "roles": '[]'
+        },
+        }
+        # copy all current users to data
         with open('./user/users.json') as data_file:
             data = json.load(data_file)
 
-        #update it with new user account
+        # update it with new user account
         data.update(a_dict)
 
-        #put all users including new one back to the user.json file
+        # put all users including new one back to the user.json file
         with open('./user/users.json', 'w') as f:
             json.dump(data, f)
 
         flash('Account Created', 'success')
         return redirect(url_for('wiki.user_login'))
-        
+
     return render_template('userCreate.html', form=form)
 
 

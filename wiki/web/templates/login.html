@@ -9,5 +9,7 @@
 	{{ form.password(placeholder='Password') }}
 	<input type="submit" class="btn btn-primary" value="Login">
 </form>
-<a href="{{ url_for('wiki.user_create') }}">Create Account</a>
+	<a href="{{ url_for('wiki.user_create') }}">Create Account</a>
+	<br>
+	<a href="{{ url_for('wiki.change_pass') }}">Change Password</a>
 {% endblock content %}
