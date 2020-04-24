@@ -7,6 +7,8 @@ from wtforms import BooleanField
 from wtforms import TextField
 from wtforms import TextAreaField
 from wtforms import PasswordField
+from wtforms import HiddenField
+from wtforms.validators import InputRequired, DataRequired
 from wtforms.validators import InputRequired
 from wtforms.validators import ValidationError
 
@@ -65,3 +67,7 @@ class CreateUserForm(Form):
 class ConfirmPassword(Form):
     password = PasswordField('', [InputRequired()])
     confirmPassword = PasswordField('', [InputRequired()])
+
+class TalkPageForm(Form):
+    comment = TextAreaField('', [InputRequired()])
+    reply = TextField('')

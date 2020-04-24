@@ -22,6 +22,8 @@ from wiki.web.forms import URLForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
+from wiki.web.forms import TalkPageForm
+from wiki.web.talk.talk import TalkPage
 
 import json
 import os
@@ -250,6 +252,18 @@ def user_admin(user_id):
 def user_delete(user_id):
     pass
 
+
+@bp.route('/talk/<string:page>/', methods=['GET', 'POST'])
+def talk(page):
+    if current_wiki.exists(page) is False:
+        return render_template('talk404.html', page=None)
+    form = TalkPageForm()
+    talkpage = TalkPage(page)
+    threads = talkpage.get_threads(page)
+    if form.validate_on_submit():
+        talkpage.post_comment(page, form.comment.data, form.reply.data)
+        return "Posted comment. <a href='" + url_for('wiki.talk', page=page) + "'>Back</a> to talk page"
+    return render_template('talk.html', form=form, page=page, threads=threads)
 
 """
     Error Handlers

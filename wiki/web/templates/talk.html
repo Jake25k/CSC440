@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}
+Talk for {{page}}
+{% endblock title %}
+
+{% block content %}
+    <script type="text/javascript">
+        function reply(id){
+            const reply_no  = document.getElementById("reply");
+            reply_no.value = id;
+        }
+    </script>
+{% for thread in threads %}
+<div class="thread">
+    <h3>Thread {{ thread.id }}</h3>
+{% for comment in thread.comments %}
+<div id="comment{{ comment.comment_id }}">
+<h5>{{ comment.comment_id }}
+    {{ comment.date }} {{ comment.username }}
+</h5>
+{% if comment.reply_id %}
+Reply to: <a href="#comment{{ comment.reply_id }}">{{ comment.reply_id }}</a>
+{% endif %}
+<p>{{ comment.post }}</p>
+<a href="#form" onclick="reply('{{ comment.comment_id }}')">Reply</a>
+</div>
+<hr>
+{% endfor %}
+</div>
+{% endfor %}
+
+<form method="POST" class="form" id="form">
+    Post <div id="reply_no"></div>
+    {{ form.hidden_tag() }}
+    Reply: {{ input(form.reply) }}
+    {{ input(form.comment) }}
+    <button type="submit">Post</button>
+</form>
+{% endblock content %}
