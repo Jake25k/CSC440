@@ -26,5 +26,12 @@
     "password": "4567",
     "authenticated": false,
     "roles": "[]"
+  },
+  "jake": {
+    "active": "true",
+    "authentication_method": "cleartext",
+    "password": "1234",
+    "authenticated": true,
+    "roles": "[]"
   }
 }

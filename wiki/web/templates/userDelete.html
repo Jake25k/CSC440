@@ -1,16 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock title %}
+{% block title %}Delete Account{% endblock title %}
 
 {% block content %}
 <form class="form form-inline" method="POST">
 	{{ form.hidden_tag() }}
 	{{ form.name(placeholder='Username') }}
 	{{ form.password(placeholder='Password') }}
-	<input type="submit" class="btn btn-primary" value="Login">
+	<input type="submit" class="btn btn-primary" value="Delete Account">
 </form>
-<a href="{{ url_for('wiki.user_create') }}">Create Account</a><br>
-<a href="{{ url_for('wiki.user_delete') }}">Delete Account</a>
-
-
 {% endblock content %}

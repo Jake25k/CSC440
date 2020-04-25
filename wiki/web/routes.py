@@ -248,9 +248,29 @@ def user_admin(user_id):
     pass
 
 
-@bp.route('/user/delete/<int:user_id>/')
-def user_delete(user_id):
-    pass
+@bp.route('/user/delete/', methods=['GET', 'POST'])
+def user_delete():
+    form = CreateUserForm()
+    #if the form is being submitted
+    if form.validate_on_submit():
+        #Remove the structure of this new user
+        data_remove = {  form.name.data + '' : {},}
+
+        #copy all current users to data
+        with open('./user/users.json') as data_file:
+            data = json.load(data_file)
+
+        #update it with new user data
+        data.update(data_remove)
+
+        #put all users including new one back to the user.json file
+        with open('./user/users.json', 'w') as f:
+            json.dump(data, f)
+
+        flash('Account Deleted', 'success')
+        return redirect(url_for('wiki.user_login'))
+
+    return render_template('userDelete.html', form=form)
 
 
 @bp.route('/talk/<string:page>/', methods=['GET', 'POST'])
